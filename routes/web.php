@@ -3,17 +3,21 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\BlogController;
+use App\Http\Controllers\Admin\AdminBlogController;
+
 
 
 
 //Routes for web
 // Redirect home to login or dashboard
+use App\Models\Blog;
+
 Route::get('/', function () {
-    if (Auth::check()) {
-        return redirect()->route('dashboard');
-    }
-    return redirect('/register');
+    $blogs = Blog::where('status', 1)->latest()->get();
+    return view('welcome', compact('blogs'));
 });
+
 
 // Main dashboard redirect logic
 Route::get('/dashboard', function () {
@@ -21,9 +25,6 @@ Route::get('/dashboard', function () {
 
     if (!$user) {
         return redirect('/login');
-    }
-
-    if ($user->role->name === 'admin') {
         return redirect()->route('admin.dashboard');
     }
 
@@ -80,6 +81,25 @@ Route::middleware(['auth'])->group(function () {
     //  Admin change password (POST)
     Route::post('/admin/change-password', [ProfileController::class, 'changePassword'])
         ->name('admin.change-password.post');
+});
+
+
+// User
+Route::middleware(['auth', 'role:user'])->group(function () {
+    Route::get('/user/blog/create', [BlogController::class, 'create'])->name('blog.create');
+    Route::post('/user/blog/store', [BlogController::class, 'store'])->name('blog.store');
+});
+
+// Admin
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin/blogs', [AdminBlogController::class, 'index'])->name('admin.blogs');
+    Route::get('/admin/blogs/{id}/{status}', [AdminBlogController::class, 'updateStatus'])->name('admin.blogs.updateStatus');
+});
+
+// Homepage
+Route::get('/', function () {
+    $blogs = \App\Models\Blog::where('status', 1)->latest()->get();
+    return view('welcome', compact('blogs'));
 });
 
 

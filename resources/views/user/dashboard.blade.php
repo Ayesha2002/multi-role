@@ -1,14 +1,16 @@
-@extends('layouts.user-layout')
+@extends('layouts.app')
 
 @section('content')
-    <h1>User Dashboard</h1>
+<div class="container">
+    <h2>Welcome, {{ Auth::user()->name }}</h2>
 
-    @if(Auth::user()->photo)
-        <img src="{{ asset('storage/' . Auth::user()->photo) }}" alt="Profile Photo" width="100" height="100">
-    @else
-        <img src="{{ asset('images/default.png') }}" alt="Default Photo" width="100" height="100">
+    @if(session('success'))
+        <p style="color:green;">{{ session('success') }}</p>
     @endif
 
-    <p>Welcome, <strong>{{ Auth::user()->name }}</strong>!</p>
-    <p>You are logged in as <strong>User</strong>.</p>
+    <div style="margin-top: 20px;">
+        <a href="{{ route('blog.create') }}" class="btn btn-primary">📝 Create Blog</a>
+    </div>
+
+</div>
 @endsection
